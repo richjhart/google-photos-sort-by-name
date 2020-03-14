@@ -21,31 +21,39 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+async function scrollDown() {
+	cwiz.scrollBy(
+	{
+		left: 0,
+		top: 100,
+		behavior: 'auto'
+	}
+	);
+	await sleep(20);
+	run();
+}
+
 async function start() {
 	// fetch all the initial values
 	await resize();
 	
 	var scrollTop = cwiz.scrollTop;
 	while (true) {
-		cwiz.scrollBy(
-		{
-			left: 0,
-			top: 100,
-			behavior: 'auto'
-		}
-		);
-		await sleep(50);
-		run();
+		scrollDown();
 		if (cwiz.scrollTop == scrollTop) {
-			// we've reached the bottom
-			break;
+			// we've reached the bottom - wait a bit longer to check if anything else loads
+			await sleep(1000);
+			scrollDown();
+			if (cwiz.scrollTop == scrollTop) {
+				break;
+			}
 		}
 		scrollTop = cwiz.scrollTop;
 	}
 	
 	cwiz.scrollTo(0, 0);
 	
-	await sleep(50);
+	await sleep(100);
 	run();
 
 	cwiz.addEventListener("scroll", scroll);
